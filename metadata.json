@@ -1,0 +1,6 @@
+{
+  "name": "Zim-Volt Solar & Electrical",
+  "description": "High-converting, mobile-first web template for Zimbabwean solar, back-up power, and electrical contractors with WhatsApp quoting and USD pricing.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
