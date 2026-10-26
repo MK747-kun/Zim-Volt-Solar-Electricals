@@ -1,47 +1,23 @@
-// src/features/solarEngine.ts
-
-export interface Appliance {
+﻿export interface Appliance {
   id: string;
   name: string;
-  category: string;
+  category?: string;
   runningWatts: number;
-  surgeMultiplier: number; // e.g. 3x for inductive loads like borehole pumps
+  surgeMultiplier: number;
   isInductive: boolean;
 }
 
-export interface SystemRecommendation {
-  inverterKw: number;
-  batteryKwh: number;
-  panelKw: number;
-  estimatedUsdCost: number;
-  paybackYears: number;
-  hasHeavySurge: boolean;
-  totalSurgeWatts: number;
-}
-
-export function calculateSurgeAndSizing(selectedAppliances: Appliance[]): {
-  totalRunningWatts: number;
-  totalSurgeWatts: number;
-  hasHeavySurge: boolean;
-} {
-  let totalRunningWatts = 0;
-  let totalSurgeWatts = 0;
-  let hasHeavySurge = false;
-
-  selectedAppliances.forEach((item) => {
-    totalRunningWatts += item.runningWatts;
-    const itemSurge = item.runningWatts * item.surgeMultiplier;
-    totalSurgeWatts += itemSurge;
-
-    if (item.isInductive || item.surgeMultiplier >= 3) {
-      hasHeavySurge = true;
-    }
-  });
+export function checkMotorSurge(appliances: Appliance[]) {
+  const heavyItems = appliances.filter(
+    (item) => item.isInductive || item.surgeMultiplier >= 3
+  );
 
   return {
-    totalRunningWatts,
-    totalSurgeWatts,
-    hasHeavySurge
+    hasHeavySurge: heavyItems.length > 0,
+    items: heavyItems,
+    recommendation: heavyItems.length > 0
+      ? 'Inductive motor surge detected (borehole/booster pump). Ensure inverter supports 2x peak surge.'
+      : 'Standard continuous loads.'
   };
 }
 

@@ -1,41 +1,16 @@
-// src/features/zigRates.ts
+﻿const FALLBACK_ZWG_RATE = 26.58;
 
-export interface ExchangeRateData {
-  rate: number;
-  lastUpdated: string;
-}
-
-// Default fallback bank rate for ZiG
-const DEFAULT_ZIG_RATE = 26.50;
-
-export async function fetchCurrentZiGRate(): Promise<ExchangeRateData> {
+export async function fetchZiGRate(): Promise<number> {
   try {
-    // Fetches live official/interbank rate API if accessible
-    const response = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
-    if (response.ok) {
-      const data = await response.json();
-      if (data.rates && data.rates.ZWG) {
-        return {
-          rate: data.rates.ZWG,
-          lastUpdated: new Date().toLocaleDateString()
-        };
-      }
-    }
-  } catch (error) {
-    console.warn('Unable to fetch live ZiG rate, using fallback default.', error);
+    const res = await fetch('https://open.er-api.com/v6/latest/USD');
+    const data = await res.json();
+    return data.rates?.ZWG || data.rates?.ZIG || FALLBACK_ZWG_RATE;
+  } catch (err) {
+    console.warn('Using fallback ZiG rate:', FALLBACK_ZWG_RATE);
+    return FALLBACK_ZWG_RATE;
   }
-
-  return {
-    rate: DEFAULT_ZIG_RATE,
-    lastUpdated: new Date().toLocaleDateString()
-  };
 }
 
-export function convertUSDToZiG(usdAmount: number, rate: number): string {
-  const totalZiG = usdAmount * rate;
-  return new Intl.NumberFormat('en-ZW', {
-    style: 'currency',
-    currency: 'ZWG',
-    maximumFractionDigits: 2
-  }).format(totalZiG);
+export function convertUsdToZig(usdAmount: number, rate: number = FALLBACK_ZWG_RATE): number {
+  return Math.round(usdAmount * rate);
 }
